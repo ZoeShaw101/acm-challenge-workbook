@@ -11,37 +11,44 @@
 
 using namespace std;
 
+/**
+ * 算法思路：
+ * 到达安全区，即到达用不可能被摧毁的点，那么需要记录每个点最早被摧毁的时间；求最少用时，用队列宽度搜索；
+ * 用一个数组记录到达某点的用时
+ * 关键是扩展点的时候的条件：如果到达给点的时间在该点最早被摧毁之前，则可以扩展该点；
+ * 且每个扩展出的新的点都应该判断一下该点是不是永远不可能被摧毁，如果是，则已经到到安全区，返回
+ */ 
+
+
 typedef pair<int, int> pii;
+const int INF = 1001;
+const int MAX_N = 401;
+int ms[MAX_N][MAX_N];  //记录每个点最早被摧毁的时间
+int d[MAX_N][MAX_N];  //记录到达每个点的时间
+int dirs[5][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}, {0, 0}};
+int m;
 
-const int INF = 10000;
-
-int d[402][402];
-int ms[402][402];
-int dx[5] = {-1, 0, 0, 1, 0};
-int dy[5] = {0, 1, -1, 0, 0};
 
 int bfs() {
-    if(ms[0][0] == INF) return 0;
-	memset(d, -1, sizeof(d));
-	queue <pii> q;
-	if(ms[0][0] > 0){
-		q.push(make_pair(0, 0));
-		d[0][0] = 0;
-	}
-	while(!q.empty()) {
-		pii p = q.front();
+	queue<pii> q;
+	memset(d, -1, sizeof(d));  //初始化到达每个点的时间
+	if (ms[0][0] == INF) return 0;
+	d[0][0] = 0;
+	q.push(make_pair(0, 0));
+	while (!q.empty()) {
+		pii point = q.front();
 		q.pop();
-		int xx, yy, x, y;
-		x = p.first;
-		y = p.second;
-		for(int i = 0; i < 4; ++i) {
-			xx = x + dx[i];
-			yy = y + dy[i];
-			if(xx >= 0 && xx <= 400 && yy >= 0 && y<= 400 && d[xx][yy] == -1 && ms[xx][yy] > d[x][y] + 1) {
+		int x = point.first;
+		int y = point.second;
+		for (int i = 0; i < 4; i++) {
+			//扩展
+			int xx = x + dirs[i][0];
+			int yy = y + dirs[i][1];
+			if (d[xx][yy] != -1) continue;
+			if (xx >= 0 && x <= MAX_N && yy >= 0 && yy <= MAX_N && d[x][y] + 1 < ms[xx][yy]) {
+				//d[x][y] + 1 < ms[xx][yy] 如果能够到达该点的时间小于该点最早被摧毁的时间，则可以扩展该点
 				d[xx][yy] = d[x][y] + 1;
-				if(ms[xx][yy] == INF) {
-					return d[xx][yy];
-				}
+				if (ms[xx][yy] == INF) return d[xx][yy];
 				q.push(make_pair(xx, yy));
 			}
 		}
@@ -50,28 +57,29 @@ int bfs() {
 }
 
 int solve() {
-	for(int i = 0; i <= 400; ++i) {
-		for(int j = 0; j <= 400; ++j){
-			ms[i][j] = INF;
+	cin >> m;
+	int x, y, t;
+	for (int i = 0; i < MAX_N; i++) {
+		for (int j = 0; j < MAX_N; j++) {
+			ms[i][j] = INF;  //先初始化每个点都是安全的
 		}
 	}
-	int m;
-	cin >> m;
-	while(m--) {
-		int x, y, t, xx ,yy;
+	while (m--) {
 		cin >> x >> y >> t;
-		for(int i = 0 ; i < 5; ++i) {
-			xx = x + dx[i];
-			yy = y + dy[i];
-            if(xx >= 0 && xx <= 400 && yy >= 0 && y<= 400) {
-                ms[xx][yy] = min(ms[xx][yy], t);
-            }
-		}
+		for (int i = 0; i < 5; i++) {
+			//得到每个点最早被摧毁的时间
+			int xx = x + dirs[i][0];
+			int yy = y + dirs[i][1];
+			if (xx >= 0 && xx <= MAX_N && yy >= 0 && yy <= MAX_N) {
+				ms[xx][yy] = min(ms[xx][yy], t);
+			}
+		} 
 	}
 	return bfs();
 }
 
 int main() {
-	cout << solve() << endl;
+	int res = solve();
+	cout << res << endl;
 	return 0;
 }

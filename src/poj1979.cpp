@@ -11,32 +11,30 @@
 using namespace std;
 
 char mat[100][100];
-int dx[4] = {-1, 0, 0, 1};
-int dy[4] = {0, 1, -1, 0};
-int m, n, ans;
+int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+int m, n, res;
 
-void dfs(int x,int y) {
-	if(mat[x][y] != '.') return;
-	++ans;
-	mat[x][y] = 'x';
+void dfs(int x, int y) {
+	if (mat[x][y] != '.') return;
+	mat[x][y] = 'x';  //标记，访问过的就不能再走了
+	res++;
 	int xx, yy;
-	for(int i = 0; i < 4; ++i) {
-		xx = x + dx[i];
-		yy = y + dy[i];
-		if(xx >= 0 && xx < m && yy >= 0 && yy < n){
+	for (int i = 0; i < 4; i++) {
+		xx = x + dirs[i][0];
+		yy = y + dirs[i][1];
+		if (xx >= 0 && xx < m && yy >= 0 && yy < n) {
 			dfs(xx, yy);
 		}
 	}
 }
 
 void solve() {
-	ans = 0;
-	for(int i = 0; i < m; ++i) {
-		cin >> mat[i];
-	}
-	for(int i = 0; i < m; ++i) {
-		for(int j = 0; j< n; ++j) {
-			if(mat[i][j] == '@') {
+	res = 0;
+	
+	for (int i = 0; i < m; i++) cin >> mat[i];
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+			if (mat[i][j] == '@') {
 				mat[i][j] = '.';
 				dfs(i, j);
 				return;
@@ -46,9 +44,12 @@ void solve() {
 }
 
 int main() {
-	while(cin >> n >> m && m > 0 && n > 0) {
+	while (cin >> n >> m && m > 0 && n > 0) {
 		solve();
-		cout << ans << endl;
+		cout << res << endl;
 	}
 	return 0;
 }
+
+
+

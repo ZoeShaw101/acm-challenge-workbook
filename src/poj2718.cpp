@@ -13,54 +13,62 @@
 
 using namespace std;
 
-const int INF = 1000000000;
+/**
+ * 题意：0-9数字分成两部分，随意组合，求能使得这两个数绝对值差最小的情况的差
+ * 算法：肯定是将数组对半分，然后求所有的全排列的差的最小值
+ * c++中全排列用到:next_permutation
+ */
 
-int n, a[10], ans, d[2];
+int n, res;
+int nums[10];
+int d[2];
+const int INF = 10000000;
 
-int array2int(int s, int t) {
-    int x = 0;
-    if(a[s] == 0 && s + 1 < t){
-        return -1;
+int array2num(int s, int t) {
+    int num = 0;
+    if (nums[s] == 0 && s + 1 < t) return -1;
+    for (int i = s; i < t; i++) {
+        num = num * 10 + nums[i];
     }
-    for(int i = s; i < t; ++i) {
-        x = x * 10 + a[i];
+    return num;
+}
+
+void helper(int index) {
+    int x = array2num(0, index);
+    int y = array2num(index, n);
+    if (x != -1 && y != -1) {
+        res = min(res, abs(x - y));
     }
-    return x;
 }
 
 void solve() {
-    ans = INF;
-    d[0] = n / 2;
-    d[1] = (n + 1) /2;
     int x, y;
-    do{
-        for(int i = 0; i < 2; ++i) {
-            if(i == 1 && d[1] == d[0]){
-                continue;
-            }
-            x = array2int(0, d[i]);
-            y = array2int(d[i], n);
-            if(x != -1 && y != -1){
-                ans = min(ans, abs(x - y));
-            }
+    do {
+        //n可能为偶数也可能为奇数，需要分开考虑
+        if (n % 2 == 0) {
+            helper(n / 2);
+        } else {
+            //n为奇数，则分给左边多和右边多的结果不一样，要分开考虑
+            int s1 = n / 2;
+            int s2 = (n + 1) / 2;
+            helper(s1);
+            helper(s2);
         }
-    }while(next_permutation(a, a + n));
+    } while (next_permutation(nums, nums + n));
 }
 
 int main() {
-    int Tcase;
-    cin >> Tcase;
+    int case_n;
+    cin >> case_n;
     cin.get();
-    while(Tcase--) {
+    while (case_n--) {
+        n = 0;
+        res = INF;
         string str;
         getline(cin, str);
         stringstream ss(str);
-        n = 0;
-        while(ss >> a[n]){
-            ++n;
-        };
+        while (ss >> nums[n]) n++;
         solve();
-        cout << ans << endl;
+        cout << res << endl;
     }
-    return 0;
 }
